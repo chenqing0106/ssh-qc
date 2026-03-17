@@ -61,10 +61,11 @@ type content struct {
 	tabProjects string
 	tabContact  string
 
-	name string
-	role string
-	city string
-	bio  []string
+	name   string
+	role   string
+	city   string
+	status string
+	bio    []string
 
 	skillsTitle string
 	skills      []string
@@ -96,8 +97,9 @@ type contact struct {
 var en = content{
 	tabAbout: "About", tabProjects: "Projects", tabContact: "Contact",
 	name: "QingChen (卿晨)", role: "Software Engineering Student", city: "Changsha, China",
+	status: "open to work",
 	bio: []string{
-		"Aspiring builder who weaves a wider world through code,",
+		"Aspiring builder who weaves a wider world through code！",
 		"exploring the intersection of technology and humanities.",
 		"Like a mushroom thriving in post-apocalyptic ruins —",
 		"slowly expanding a decentralized, anti-monopoly colony.",
@@ -122,13 +124,6 @@ var en = content{
 				"https://github.com/chenqing0106/chain-garden",
 			},
 		},
-		{
-			name: "Virtual TCM Teaching Platform",
-			desc: "3D interactive online learning system for traditional Chinese\nmedicine, built with React Three Fiber. Delivered 5 core\nmodules independently during a company internship.",
-			links: []string{
-				"https://github.com/software-engineer-group-oasis/chinese-medicine",
-			},
-		},
 	},
 	contactTitle: "Get in Touch",
 	contacts: []contact{
@@ -144,6 +139,7 @@ var en = content{
 var zh = content{
 	tabAbout: "关于", tabProjects: "项目", tabContact: "联系",
 	name: "卿晨 (QingChen)", role: "软件工程在读学生", city: "中国·长沙",
+	status: "求职中",
 	bio: []string{
 		"想成为世界的 builder，用编程去编织更广阔的世界，",
 		"致力于探索技术与人文的交叉点。",
@@ -170,13 +166,6 @@ var zh = content{
 				"https://github.com/chenqing0106/chain-garden",
 			},
 		},
-		{
-			name: "虚拟中医教学平台",
-			desc: "基于 React Three Fiber 构建的 3D 交互在线学习系统，\n聚焦传统中医教学。在企业实习期间独立交付 5 个核心模块。",
-			links: []string{
-				"https://github.com/software-engineer-group-oasis/chinese-medicine",
-			},
-		},
 	},
 	contactTitle: "联系方式",
 	contacts: []contact{
@@ -197,8 +186,9 @@ type model struct {
 	lang     string
 	width    int
 	height   int
-	bioChars int       // typing animation: chars revealed so far
-	now      time.Time // real-time clock
+	bioChars     int       // typing animation: chars revealed so far
+	now          time.Time // real-time clock
+	sparkleFrame int       // sparkle animation frame counter
 }
 
 func initialModel() model {
@@ -216,6 +206,7 @@ func (m model) c() content {
 
 type typingMsg struct{}
 type clockMsg time.Time
+type sparkleMsg struct{}
 
 func typingCmd() tea.Cmd {
 	return tea.Tick(20*time.Millisecond, func(t time.Time) tea.Msg { return typingMsg{} })
@@ -225,8 +216,12 @@ func clockCmd() tea.Cmd {
 	return tea.Tick(time.Second, func(t time.Time) tea.Msg { return clockMsg(t) })
 }
 
+func sparkleCmd() tea.Cmd {
+	return tea.Tick(120*time.Millisecond, func(t time.Time) tea.Msg { return sparkleMsg{} })
+}
+
 func (m model) Init() tea.Cmd {
-	return tea.Batch(typingCmd(), clockCmd())
+	return tea.Batch(typingCmd(), clockCmd(), sparkleCmd())
 }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -244,6 +239,10 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case clockMsg:
 		m.now = time.Time(msg)
 		return m, clockCmd()
+
+	case sparkleMsg:
+		m.sparkleFrame++
+		return m, sparkleCmd()
 
 	case tea.KeyMsg:
 		switch msg.String() {
@@ -297,6 +296,25 @@ func (m model) View() string {
 	}
 }
 
+// renderSparkles renders a full-width animated row of sparkle characters
+// that fills exactly `width` visible columns beneath the name art.
+func renderSparkles(frame, width int) string {
+	chars := []rune{'✦', '✧', '·', ' ', ' ', ' ', ' '}
+	colors := []lipgloss.Color{colorPurple, colorCyan, colorPink, colorYellow, colorWhite}
+	var b strings.Builder
+	for i := 0; i < width; i++ {
+		phase := (frame + i*2) % len(chars)
+		ch := chars[phase]
+		if ch == ' ' {
+			b.WriteRune(' ')
+		} else {
+			col := colors[(i+frame/4)%len(colors)]
+			b.WriteString(lipgloss.NewStyle().Foreground(col).Render(string(ch)))
+		}
+	}
+	return b.String()
+}
+
 // indent adds 2 spaces to the left of every line in a multi-line block.
 func indent(s string) string {
 	return lipgloss.NewStyle().PaddingLeft(2).Render(s)
@@ -321,8 +339,12 @@ func (m model) viewHome(c content, w int) string {
 	name := lipgloss.NewStyle().Foreground(colorPurple).
 		Render(strings.TrimRight(nameArt, "\n"))
 
+	csuLink := hyperlink("https://www.csu.edu.cn", "CSU")
 	sub := lipgloss.NewStyle().Foreground(colorCyan).Italic(true).
-		Render(c.role + "  ·  " + c.city)
+		Render(csuLink + "  " + c.role + "  ·  " + c.city)
+
+	badge := lipgloss.NewStyle().Foreground(colorGreen).Bold(true).
+		Render("● " + c.status)
 
 	bio := m.renderBio(c)
 
@@ -342,8 +364,10 @@ func (m model) viewHome(c content, w int) string {
 
 	preview := m.viewMenuPreview(c)
 
+	sparkles := renderSparkles(m.sparkleFrame, lipgloss.Width(name))
+
 	rightCol := lipgloss.JoinVertical(lipgloss.Left,
-		name, sub, "", bio, "", menu, "", preview,
+		name, sparkles, sub, badge, "", bio, "", menu, "", preview,
 	)
 
 	gap := 4
@@ -455,6 +479,13 @@ func (m model) viewDetail(c content, w int, title, body string) string {
 	)
 }
 
+// hyperlink wraps text with OSC 8 terminal hyperlink escape codes.
+// Terminals that support it (iTerm2, Kitty, GNOME Terminal, etc.) render
+// a clickable link; others display the text as-is.
+func hyperlink(url, text string) string {
+	return "\x1b]8;;" + url + "\x1b\\" + text + "\x1b]8;;\x1b\\"
+}
+
 func max(a, b int) int {
 	if a > b {
 		return a
@@ -512,7 +543,8 @@ func (m model) viewProjectsBody(c content) string {
 			lines = append(lines, "   "+lipgloss.NewStyle().Foreground(colorWhite).Render(dl))
 		}
 		for _, link := range p.links {
-			lines = append(lines, "   "+lipgloss.NewStyle().Foreground(colorCyan).Render("→ "+link))
+			linked := hyperlink(link, "→ "+link)
+			lines = append(lines, "   "+lipgloss.NewStyle().Foreground(colorCyan).Render(linked))
 		}
 		lines = append(lines, "")
 	}
@@ -521,11 +553,30 @@ func (m model) viewProjectsBody(c content) string {
 
 // ── contact ───────────────────────────────────────────────────────────────────
 
+func contactURL(val string) string {
+	switch {
+	case strings.HasPrefix(val, "github.com/"):
+		return "https://" + val
+	case strings.HasPrefix(val, "linkedin.com/"):
+		return "https://" + val
+	case strings.HasPrefix(val, "http"):
+		return val
+	case strings.Contains(val, "@") && !strings.HasPrefix(val, "@"):
+		return "mailto:" + val
+	default:
+		return ""
+	}
+}
+
 func (m model) viewContactBody(c content) string {
 	var lines []string
 	for _, ct := range c.contacts {
 		label := lipgloss.NewStyle().Foreground(colorYellow).Width(12).Render(ct.label)
-		value := lipgloss.NewStyle().Foreground(colorCyan).Render(ct.value)
+		display := ct.value
+		if url := contactURL(ct.value); url != "" {
+			display = hyperlink(url, ct.value)
+		}
+		value := lipgloss.NewStyle().Foreground(colorCyan).Render(display)
 		lines = append(lines, "  "+label+value)
 	}
 	lines = append(lines, "")
