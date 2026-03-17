@@ -1,0 +1,13 @@
+# Binary
+ssh-portfolio
+
+# SSH host keys
+.ssh/
+
+# macOS
+.DS_Store
+.obsidian/
+
+# IDE
+.idea/
+.vscode/
