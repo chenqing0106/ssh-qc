@@ -11,3 +11,10 @@ ssh-portfolio
 # IDE
 .idea/
 .vscode/
+
+# Air hot reload
+.air.toml
+tmp/
+
+# Original photos
+resources/
