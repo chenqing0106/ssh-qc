@@ -18,3 +18,9 @@ tmp/
 
 # Original photos
 resources/
+
+# Claude memory
+memory/
+
+# Local personal notes (server IPs, SSH aliases, etc.)
+local/

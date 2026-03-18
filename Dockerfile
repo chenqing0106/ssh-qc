@@ -1,6 +1,7 @@
-FROM golang:1.22-alpine AS builder
+FROM golang:1.24-alpine AS builder
 
 WORKDIR /app
+ENV GOPROXY=https://goproxy.cn,direct
 COPY go.mod go.sum ./
 RUN go mod download
 
@@ -16,6 +17,6 @@ COPY --from=builder /app/ssh-portfolio .
 
 RUN mkdir -p .ssh
 
-EXPOSE 23234
+EXPOSE 106
 
 CMD ["./ssh-portfolio"]

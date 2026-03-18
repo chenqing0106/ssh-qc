@@ -1,18 +1,4 @@
-# SSH Portfolio — 项目背景与技术方案
-
-## 项目目标
-
-构建一个基于终端的个人网站，用户通过 `ssh your-domain.com` 即可访问，看到的是交互式 TUI 界面而非普通 shell。参考：ssh.moriliu.com、ssh hi.zachkrall.com。
-
-## 技术栈
-
-| 组件 | 技术 |
-|------|------|
-| SSH 服务器 | [Wish](https://github.com/charmbracelet/wish) (Charm) |
-| TUI 框架 | [Bubble Tea](https://github.com/charmbracelet/bubbletea) |
-| 终端样式 | [Lip Gloss](https://github.com/charmbracelet/lipgloss) |
-| 语言 | Go |
-| 部署 | Fly.io（免费额度） |
+# SSH Portfolio — 架构与决策日志
 
 ## 设计思路
 
@@ -22,7 +8,7 @@
 用户 ssh 连接
     │
     ▼
-Wish SSH Server（监听 :23234）
+Wish SSH Server（监听 :106）
     │  检查 PTY 是否存在，无 PTY 则拒绝并提示
     ▼
 teaHandler → 创建 Bubble Tea model
@@ -123,47 +109,18 @@ pageAbout/Projects/Contact  --esc/backspace--> pageHome
 
 Lip Gloss border + width 计算复杂，`Width()` 设置的是内容区宽度，加上 padding 和 border 后总宽度难以精确控制，导致布局溢出。现改为纯文字排版 + `indent()` 函数（`PaddingLeft(2)`）统一管理左边距。
 
-## 功能
-
-- 左侧彩色 ASCII 头像（`ascii/avatar.txt`）
-- 右侧 ASCII 名字大字（`ascii/name.txt`）
-- Home 菜单导航：`↑↓` / `jk` 选择，`enter` 进入详情页
-- 菜单悬停预览：选中某项时在菜单下方显示该页内容摘要
-- Bio 打字机动画：首次连接时逐字符显示（20ms/字符）
-- 右下角实时时钟（每秒刷新）
-- 三个详情页：**About**、**Projects**、**Contact**
-- 中英双语实时切换（`l`）
-- 详情页 `esc` 返回 Home
-
-## 交互拓展备忘（待做）
-
-| 优先级 | 功能             | 描述                                       |
-| --- | -------------- | ---------------------------------------- |
-| 高   | 访客计数器          | 每次连接 +1，持久化到文件，首页显示 "You are visitor #N" |
-| 中   | 状态标签           | 名字旁显示 `● open to work` 等彩色徽章             |
-| 中   | 随机 tagline     | 每次连接随机一句话，显示在 bio 下方                     |
-| 低   | Konami Code 彩蛋 | ↑↑↓↓←→←→ 触发矩阵雨动画                         |
-| 低   | 隐藏命令彩蛋         | 特定按键序列显示隐藏内容                             |
-
 ## 本地启动流程
 
 ```bash
-# 1. 构建
-go build -o ssh-portfolio .
+# 热重载（日常开发用）
+air
 
-# 2. 启动服务（后台运行）
-./ssh-portfolio &
-
-# 3. 连接测试
-ssh -p 23234 localhost
-
-# 4. 停止服务
-kill $(pgrep ssh-portfolio)
+# 连接测试
+ssh -p 222 localhost
 ```
 
 > 首次启动会在 `.ssh/id_ed25519` 自动生成主机密钥，无需手动操作。
->
-> 若遇到 `Connection refused`，确认服务确实在运行：`lsof -i :23234`
+> 若遇到 `Connection refused`，确认服务在运行：`lsof -i :106`
 
 ## 依赖版本说明
 
@@ -176,12 +133,83 @@ go get github.com/charmbracelet/bubbletea@latest \
        github.com/charmbracelet/wish@latest
 ```
 
-## 部署方式（Fly.io）
+## 部署方式（Ubuntu VPS + Docker）
 
-用户侧只需：
-1. 注册 [Fly.io](https://fly.io) 账号
-2. 安装 `flyctl`
-3. 按指引执行几条命令
+### 1. 上传项目代码
+
+在**本机**执行：
+
+```bash
+rsync -avz \
+  --filter=':- .gitignore' \
+  --exclude='.git/' \
+  --exclude='memory/' \
+  --include='.ssh/' \
+  --delete --delete-excluded \
+  <local-project-path>/ <server>:~/ssh-portfolio/
+```
+
+> 完整命令（含本机路径和 SSH alias）见 `local/ops.md`。
+
+### 2. 运行部署脚本
+
+在**服务器**上执行：
+
+```bash
+cd ~/ssh-portfolio
+bash deploy.sh
+```
+
+脚本会自动完成：安装 Docker（如未安装）、构建镜像、替换旧容器、配置 UFW。
+端口从 `Dockerfile` 的 `EXPOSE` 自动读取，无需手动指定。
+
+如需覆盖参数：
+
+```bash
+PORT=106 CONTAINER_NAME=my-portfolio bash deploy.sh
+```
+
+### 3. 开放云服务商安全组（必须）
+
+云服务商（腾讯云/阿里云等）有独立的安全组，和 UFW 是两层，缺一不可。在控制台手动添加入站规则：
+
+> - 协议：TCP
+> - 端口：与 `Dockerfile` 中 `EXPOSE` 一致
+> - 来源：0.0.0.0/0
+
+> **排查 `Operation timed out`**：如果容器运行正常（`docker ps` 显示 Up）、UFW 已放行，但仍然连不上，99% 是安全组没配。
+
+### 4. 验证
+
+```bash
+ssh -p <PORT> <server-ip>
+```
+
+### 日常更新流程
+
+```bash
+# 本机：同步新代码
+rsync -avz \
+  --filter=':- .gitignore' \
+  --exclude='.git/' \
+  --exclude='memory/' \
+  --include='.ssh/' \
+  --delete --delete-excluded \
+  <local-project-path>/ <server>:~/ssh-portfolio/
+
+# 服务器：重新构建并重启
+cd ~/ssh-portfolio
+bash deploy.sh
+```
+
+### 常用命令
+
+```bash
+docker logs ssh-portfolio -f      # 实时日志
+docker ps                          # 确认容器运行状态
+docker stop ssh-portfolio          # 停止
+docker restart ssh-portfolio       # 重启
+```
 
 ## 项目文件结构
 
@@ -196,5 +224,7 @@ ssh-portfolio/
 ├── go.mod
 ├── go.sum
 ├── Dockerfile
-└── fly.toml
+├── deploy.sh              # 服务器部署脚本（端口从 Dockerfile 自动读取）
+└── local/                 # 个人运维笔记，不上传（已加入 .gitignore）
+    └── ops.md             # 服务器 IP、SSH alias、完整 rsync 命令等
 ```
