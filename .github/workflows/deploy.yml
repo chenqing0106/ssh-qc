@@ -1,8 +1,10 @@
+# Deploy to VPS via GitHub Actions
 name: Deploy to VPS
 
 on:
   push:
     branches: [main]
+  workflow_dispatch:
 
 jobs:
   deploy:
