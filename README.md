@@ -3,8 +3,10 @@
 一个基于终端的个人主页，通过 SSH 即可访问，不需要浏览器。
 
 ```bash
-ssh -p 23234 your-domain.com
+ssh -p 106 47.243.32.207
 ```
+
+任何人在终端运行以上命令即可访问，无需安装任何东西。
 
 使用 [Wish](https://github.com/charmbracelet/wish) + [Bubble Tea](https://github.com/charmbracelet/bubbletea) 构建，Go 语言编写。
 
@@ -45,11 +47,10 @@ ssh -p 23234 your-domain.com
 air
 
 # 或手动构建运行
-go build -o ssh-portfolio .
-./ssh-portfolio
+go build -o ssh-portfolio . && ./ssh-portfolio
 
 # 连接测试
-ssh -p 23234 localhost
+ssh -p 106 localhost
 ```
 
 首次运行会自动在 `.ssh/id_ed25519` 生成主机密钥。
@@ -66,17 +67,16 @@ ASCII 资源文件：
 
 需要支持持久 TCP 连接的平台（不支持 Vercel / Netlify）。
 
-**Zeabur**（支持支付宝 / 微信支付）：
-1. 将本仓库推送到 GitHub
-2. 在 Zeabur 新建项目，连接仓库
-3. 暴露 TCP 端口 `23234`
-4. 创建 Volume 挂载到 `/app/.ssh`，持久化主机密钥
-
 **任意 VPS**（阿里云、腾讯云等）：
+
 ```bash
-go build -o ssh-portfolio .
-./ssh-portfolio &
+# 上传代码后，在服务器上执行
+bash deploy.sh
 ```
+
+脚本自动处理 Docker 安装、镜像构建、容器替换、UFW 配置。端口从 `Dockerfile` 的 `EXPOSE` 读取。
+
+> 云服务商的安全组需要手动在控制台放行对应端口（入站 TCP）。
 
 ## 项目结构
 
@@ -87,5 +87,5 @@ ssh-portfolio/
 │   ├── avatar.txt   # ASCII 头像
 │   └── name.txt     # 大字名称
 ├── Dockerfile
-└── fly.toml         # Fly.io 配置（可选）
+└── deploy.sh        # VPS 一键部署脚本
 ```
