@@ -17,6 +17,7 @@ import (
 	"github.com/charmbracelet/wish"
 	"github.com/charmbracelet/wish/bubbletea"
 	"github.com/muesli/termenv"
+	"gopkg.in/yaml.v3"
 )
 
 //go:embed ascii/avatar.txt
@@ -24,6 +25,9 @@ var avatarArt string
 
 //go:embed ascii/name.txt
 var nameArt string
+
+//go:embed content.yaml
+var contentYAML []byte
 
 const (
 	host = "0.0.0.0"
@@ -58,125 +62,55 @@ const (
 // ── content ───────────────────────────────────────────────────────────────────
 
 type content struct {
-	tabAbout    string
-	tabProjects string
-	tabContact  string
+	TabAbout    string `yaml:"tab_about"`
+	TabProjects string `yaml:"tab_projects"`
+	TabContact  string `yaml:"tab_contact"`
 
-	name   string
-	role   string
-	city   string
-	status string
-	bio    []string
+	Name   string   `yaml:"name"`
+	Role   string   `yaml:"role"`
+	City   string   `yaml:"city"`
+	Status string   `yaml:"status"`
+	Bio    []string `yaml:"bio"`
 
-	skillsTitle string
-	skills      []string
+	SkillsTitle string   `yaml:"skills_title"`
+	Skills      []string `yaml:"skills"`
 
-	projectsTitle string
-	projects      []project
+	ProjectsTitle string    `yaml:"projects_title"`
+	Projects      []project `yaml:"projects"`
 
-	contactTitle string
-	contacts     []contact
+	ContactTitle string    `yaml:"contact_title"`
+	Contacts     []contact `yaml:"contacts"`
 
-	helpNav  string
-	helpOpen string
-	helpBack string
-	helpLang string
-	helpQuit string
+	HelpNav  string `yaml:"help_nav"`
+	HelpOpen string `yaml:"help_open"`
+	HelpBack string `yaml:"help_back"`
+	HelpLang string `yaml:"help_lang"`
+	HelpQuit string `yaml:"help_quit"`
 }
 
 type project struct {
-	name  string
-	desc  string
-	links []string
+	Name  string   `yaml:"name"`
+	Desc  string   `yaml:"desc"`
+	Links []string `yaml:"links"`
 }
 
 type contact struct {
-	label string
-	value string
+	Label string `yaml:"label"`
+	Value string `yaml:"value"`
 }
 
-var en = content{
-	tabAbout: "About", tabProjects: "Projects", tabContact: "Contact",
-	name: "QingChen (卿晨)", role: "Software Engineering Student", city: "Changsha, China",
-	status: "open to work",
-	bio: []string{
-		"Aspiring builder who weaves a wider world through code！",
-		"exploring the intersection of technology and humanities.",
-		"Like a mushroom thriving in post-apocalyptic ruins —",
-		"slowly expanding a decentralized, anti-monopoly colony.",
-	},
-	skillsTitle: "Skills & Expertise",
-	skills: []string{
-		"React / Next.js 15 / TypeScript",
-		"LLM Integration (Claude / Gemini / Qwen API)",
-		"Canvas API / Web Audio API / Tone.js",
-		"Node.js / RESTful API",
-		"Web3 concepts & Solidity basics",
-		"AI-Native Development (Claude Code, Cursor)",
-		"Visual arts, humanities & cultural exploration",
-	},
-	projectsTitle: "Selected Projects",
-	projects: []project{
-		{
-			name: "Chain-Garden",
-			desc: "AI Native generative art platform — turns emotions into living\nplants with unique visuals and sound, powered by Prompt\nChains and Canvas rendering. Hackathon Best Creativity Award.",
-			links: []string{
-				"https://chain-garden-zetachain.vercel.app",
-				"https://github.com/chenqing0106/chain-garden",
-			},
-		},
-	},
-	contactTitle: "Get in Touch",
-	contacts: []contact{
-		{"GitHub", "github.com/chenqing0106"},
-		{"Email", "qingchen060106@gmail.com"},
-		{"Twitter/X", "@qingchen060106"},
-		{"Telegram", "@qingchen060106"},
-		{"LinkedIn", "linkedin.com/in/sylva-qing"},
-	},
-	helpNav: "←→ select", helpOpen: "enter open", helpBack: "esc back", helpLang: "l lang", helpQuit: "q quit",
-}
+var en, zh content
 
-var zh = content{
-	tabAbout: "关于", tabProjects: "项目", tabContact: "联系",
-	name: "卿晨 (QingChen)", role: "软件工程在读学生", city: "中国·长沙",
-	status: "求职中",
-	bio: []string{
-		"想成为世界的 builder，用编程去编织更广阔的世界，",
-		"致力于探索技术与人文的交叉点。",
-		"成为一颗末日废墟下生存的菌菇，",
-		"慢慢延展构造去中心化、反垄断的世界。",
-	},
-	skillsTitle: "技能 / 专长",
-	skills: []string{
-		"React / Next.js 15 / TypeScript",
-		"LLM 集成（Claude / Gemini / Qwen API）",
-		"Canvas API / Web Audio API / Tone.js",
-		"Node.js / RESTful API",
-		"Web3 概念与 Solidity 基础",
-		"AI 原生开发（Claude Code, Cursor）",
-		"日常关注视觉艺术、人文与文化话题",
-	},
-	projectsTitle: "精选项目",
-	projects: []project{
-		{
-			name: "Chain-Garden",
-			desc: "AI 原生生成艺术平台——将情绪转化为有生命的植物，\n融合独特视觉与音效，基于 Prompt Chains 与 Canvas 渲染。\n黑客松最佳创意奖。",
-			links: []string{
-				"https://chain-garden-zetachain.vercel.app",
-				"https://github.com/chenqing0106/chain-garden",
-			},
-		},
-	},
-	contactTitle: "联系方式",
-	contacts: []contact{
-		{"GitHub", "github.com/chenqing0106"},
-		{"邮箱", "qingchen060106@gmail.com"},
-		{"Twitter/X", "@qingchen060106"},
-		{"Telegram", "@qingchen060106"},
-		{"LinkedIn", "linkedin.com/in/sylva-qing"},
-	},
-	helpNav: "←→ 选择", helpOpen: "enter 进入", helpBack: "esc 返回", helpLang: "l 语言", helpQuit: "q 退出",
+func init() {
+	var cf struct {
+		En content `yaml:"en"`
+		Zh content `yaml:"zh"`
+	}
+	if err := yaml.Unmarshal(contentYAML, &cf); err != nil {
+		log.Fatalf("failed to parse content.yaml: %v", err)
+	}
+	en = cf.En
+	zh = cf.Zh
 }
 
 // ── model ─────────────────────────────────────────────────────────────────────
@@ -287,11 +221,11 @@ func (m model) View() string {
 
 	switch m.page {
 	case pageAbout:
-		return m.viewDetail(c, w, c.tabAbout, m.viewAboutBody(c))
+		return m.viewDetail(c, w, c.TabAbout, m.viewAboutBody(c))
 	case pageProjects:
-		return m.viewDetail(c, w, c.tabProjects, m.viewProjectsBody(c))
+		return m.viewDetail(c, w, c.TabProjects, m.viewProjectsBody(c))
 	case pageContact:
-		return m.viewDetail(c, w, c.tabContact, m.viewContactBody(c))
+		return m.viewDetail(c, w, c.TabContact, m.viewContactBody(c))
 	default:
 		return m.viewHome(c, w)
 	}
@@ -342,14 +276,14 @@ func (m model) viewHome(c content, w int) string {
 
 	csuLink := hyperlink("https://www.csu.edu.cn", "CSU")
 	sub := lipgloss.NewStyle().Foreground(colorCyan).Italic(true).
-		Render(csuLink + "  " + c.role + "  ·  " + c.city)
+		Render(csuLink + "  " + c.Role + "  ·  " + c.City)
 
 	badge := lipgloss.NewStyle().Foreground(colorGreen).Bold(true).
-		Render("● " + c.status)
+		Render("● " + c.Status)
 
 	bio := m.renderBio(c)
 
-	menuItems := []string{c.tabAbout, c.tabProjects, c.tabContact}
+	menuItems := []string{c.TabAbout, c.TabProjects, c.TabContact}
 	var menuParts []string
 	for i, item := range menuItems {
 		if i == m.selected {
@@ -395,13 +329,13 @@ func (m model) renderBio(c content) string {
 	total := totalBioChars(c)
 	var lines []string
 	if m.bioChars >= total {
-		for _, l := range c.bio {
+		for _, l := range c.Bio {
 			lines = append(lines, lipgloss.NewStyle().Foreground(colorWhite).Render(l))
 		}
 		return strings.Join(lines, "\n")
 	}
 	remaining := m.bioChars
-	for _, l := range c.bio {
+	for _, l := range c.Bio {
 		runes := []rune(l)
 		if remaining <= 0 {
 			break
@@ -415,7 +349,7 @@ func (m model) renderBio(c content) string {
 
 func totalBioChars(c content) int {
 	total := 0
-	for _, l := range c.bio {
+	for _, l := range c.Bio {
 		total += len([]rune(l))
 	}
 	return total
@@ -427,19 +361,19 @@ func (m model) viewMenuPreview(c content) string {
 	switch m.selected {
 	case 0: // About
 		return lipgloss.JoinVertical(lipgloss.Left,
-			dim.Render("   "+c.name),
-			dim.Render(fmt.Sprintf("   %d skills · %s", len(c.skills), c.city)),
+			dim.Render("   "+c.Name),
+			dim.Render(fmt.Sprintf("   %d skills · %s", len(c.Skills), c.City)),
 		)
 	case 1: // Projects
 		var lines []string
-		for _, p := range c.projects {
-			lines = append(lines, dim.Render("   · "+p.name))
+		for _, p := range c.Projects {
+			lines = append(lines, dim.Render("   · "+p.Name))
 		}
 		return strings.Join(lines, "\n")
 	case 2: // Contact
 		var lines []string
-		for _, ct := range c.contacts[:min(3, len(c.contacts))] {
-			lines = append(lines, dim.Render("   "+ct.value))
+		for _, ct := range c.Contacts[:min(3, len(c.Contacts))] {
+			lines = append(lines, dim.Render("   "+ct.Value))
 		}
 		return strings.Join(lines, "\n")
 	}
@@ -449,7 +383,7 @@ func (m model) viewMenuPreview(c content) string {
 // homeHelpBar renders the help bar with a right-aligned clock.
 func (m model) homeHelpBar(c content, w int) string {
 	left := lipgloss.NewStyle().Foreground(colorDim).
-		Render("  " + strings.Join([]string{c.helpNav, c.helpOpen, c.helpLang, c.helpQuit}, "   "))
+		Render("  " + strings.Join([]string{c.HelpNav, c.HelpOpen, c.HelpLang, c.HelpQuit}, "   "))
 	clock := lipgloss.NewStyle().Foreground(colorDim).
 		Render(m.now.Format("15:04:05") + "  ")
 
@@ -466,7 +400,7 @@ func (m model) viewDetail(c content, w int, title, body string) string {
 	heading := lipgloss.NewStyle().Foreground(colorCyan).Bold(true).
 		Render("── " + title + " " + strings.Repeat("─", max(0, w-len(title)-8)))
 
-	help := helpBar(c.helpBack, c.helpLang, c.helpQuit)
+	help := helpBar(c.HelpBack, c.HelpLang, c.HelpQuit)
 
 	return lipgloss.JoinVertical(lipgloss.Left,
 		"",
@@ -505,20 +439,20 @@ func (m model) viewAboutBody(c content) string {
 	}
 
 	info := strings.Join([]string{
-		label("Name") + val(c.name),
-		label("Role") + val(c.role),
-		label("City") + val(c.city),
+		label("Name") + val(c.Name),
+		label("Role") + val(c.Role),
+		label("City") + val(c.City),
 	}, "\n")
 
 	bioHeader := lipgloss.NewStyle().Foreground(colorCyan).Bold(true).Render("Bio")
 	var bioLines []string
-	for _, l := range c.bio {
+	for _, l := range c.Bio {
 		bioLines = append(bioLines, "  "+lipgloss.NewStyle().Foreground(colorWhite).Render(l))
 	}
 
-	skillHeader := lipgloss.NewStyle().Foreground(colorCyan).Bold(true).Render(c.skillsTitle)
+	skillHeader := lipgloss.NewStyle().Foreground(colorCyan).Bold(true).Render(c.SkillsTitle)
 	var skillLines []string
-	for _, s := range c.skills {
+	for _, s := range c.Skills {
 		skillLines = append(skillLines, "  "+lipgloss.NewStyle().Foreground(colorGreen).Render("▸ "+s))
 	}
 
@@ -535,15 +469,15 @@ func (m model) viewAboutBody(c content) string {
 
 func (m model) viewProjectsBody(c content) string {
 	var lines []string
-	for i, p := range c.projects {
+	for i, p := range c.Projects {
 		lines = append(lines,
 			lipgloss.NewStyle().Foreground(colorPurple).Bold(true).
-				Render(fmt.Sprintf("%d. %s", i+1, p.name)),
+				Render(fmt.Sprintf("%d. %s", i+1, p.Name)),
 		)
-		for _, dl := range strings.Split(p.desc, "\n") {
+		for _, dl := range strings.Split(p.Desc, "\n") {
 			lines = append(lines, "   "+lipgloss.NewStyle().Foreground(colorWhite).Render(dl))
 		}
-		for _, link := range p.links {
+		for _, link := range p.Links {
 			linked := hyperlink(link, "→ "+link)
 			lines = append(lines, "   "+lipgloss.NewStyle().Foreground(colorCyan).Render(linked))
 		}
@@ -571,11 +505,11 @@ func contactURL(val string) string {
 
 func (m model) viewContactBody(c content) string {
 	var lines []string
-	for _, ct := range c.contacts {
-		label := lipgloss.NewStyle().Foreground(colorYellow).Width(12).Render(ct.label)
-		display := ct.value
-		if url := contactURL(ct.value); url != "" {
-			display = hyperlink(url, ct.value)
+	for _, ct := range c.Contacts {
+		label := lipgloss.NewStyle().Foreground(colorYellow).Width(12).Render(ct.Label)
+		display := ct.Value
+		if url := contactURL(ct.Value); url != "" {
+			display = hyperlink(url, ct.Value)
 		}
 		value := lipgloss.NewStyle().Foreground(colorCyan).Render(display)
 		lines = append(lines, "  "+label+value)
