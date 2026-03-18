@@ -182,7 +182,7 @@ PORT=106 CONTAINER_NAME=my-portfolio bash deploy.sh
 ### 4. 验证
 
 ```bash
-ssh -p <PORT> <server-ip>
+ssh -p 106 ssh.mornqing.com
 ```
 
 ### 日常更新流程
