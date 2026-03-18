@@ -145,7 +145,7 @@ rsync -avz \
   --exclude='.git/' \
   --exclude='memory/' \
   --exclude='.ssh/' \
-  --delete --delete-excluded \
+  --delete \
   <local-project-path>/ <server>:~/ssh-portfolio/
 ```
 
@@ -195,7 +195,7 @@ rsync -avz \
   --exclude='.git/' \
   --exclude='memory/' \
   --exclude='.ssh/' \
-  --delete --delete-excluded \
+  --delete \
   <local-project-path>/ <server>:~/ssh-portfolio/
 
 # 服务器：重新构建并重启

@@ -27,7 +27,7 @@ jobs:
             --exclude='.git/' \
             --exclude='memory/' \
             --exclude='.ssh/' \
-            --delete --delete-excluded \
+            --delete \
             ./ ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:~/ssh-portfolio/
 
       - name: Deploy on server
