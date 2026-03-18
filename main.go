@@ -16,6 +16,7 @@ import (
 	"github.com/charmbracelet/ssh"
 	"github.com/charmbracelet/wish"
 	"github.com/charmbracelet/wish/bubbletea"
+	"github.com/muesli/termenv"
 )
 
 //go:embed ascii/avatar.txt
@@ -626,5 +627,8 @@ func teaHandler(s ssh.Session) (tea.Model, []tea.ProgramOption) {
 		fmt.Fprintln(s, "No PTY requested, please use: ssh -t ...")
 		return nil, nil
 	}
+	renderer := bubbletea.MakeRenderer(s)
+	renderer.SetColorProfile(termenv.TrueColor)
+	lipgloss.SetDefaultRenderer(renderer)
 	return initialModel(), []tea.ProgramOption{tea.WithAltScreen()}
 }

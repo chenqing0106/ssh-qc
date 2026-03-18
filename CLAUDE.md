@@ -144,12 +144,13 @@ rsync -avz \
   --filter=':- .gitignore' \
   --exclude='.git/' \
   --exclude='memory/' \
-  --include='.ssh/' \
+  --exclude='.ssh/' \
   --delete --delete-excluded \
   <local-project-path>/ <server>:~/ssh-portfolio/
 ```
 
 > 完整命令（含本机路径和 SSH alias）见 `local/ops.md`。
+> `.ssh/` 必须排除：服务器的主机密钥由容器首次启动自动生成并持久化在 volume 里，rsync 不能覆盖它，否则每次部署后客户端会报 host key 变更警告。
 
 ### 2. 运行部署脚本
 
@@ -193,7 +194,7 @@ rsync -avz \
   --filter=':- .gitignore' \
   --exclude='.git/' \
   --exclude='memory/' \
-  --include='.ssh/' \
+  --exclude='.ssh/' \
   --delete --delete-excluded \
   <local-project-path>/ <server>:~/ssh-portfolio/
 
