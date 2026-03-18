@@ -15,7 +15,7 @@ RUN apk --no-cache add ca-certificates
 WORKDIR /app
 COPY --from=builder /app/ssh-portfolio .
 
-RUN mkdir -p .ssh
+RUN mkdir -p .ssh data
 
 EXPOSE 106
 

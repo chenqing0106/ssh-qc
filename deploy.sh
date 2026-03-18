@@ -6,6 +6,7 @@ APP_DIR="$(cd "$(dirname "$0")" && pwd)"
 IMAGE_NAME="${IMAGE_NAME:-ssh-portfolio}"
 CONTAINER_NAME="${CONTAINER_NAME:-ssh-portfolio}"
 SSH_KEY_DIR="${SSH_KEY_DIR:-$APP_DIR/.ssh}"
+DATA_DIR="${DATA_DIR:-$APP_DIR/data}"
 
 # Auto-detect port from Dockerfile EXPOSE — no hardcoding needed
 PORT="${PORT:-$(grep -m1 '^EXPOSE' "$APP_DIR/Dockerfile" | awk '{print $2}')}"
@@ -40,11 +41,13 @@ fi
 
 # 4. Run new container
 echo "==> Starting container..."
+mkdir -p "$DATA_DIR"
 docker run -d \
   --name "$CONTAINER_NAME" \
   --restart unless-stopped \
   -p "${PORT}:${PORT}" \
   -v "${SSH_KEY_DIR}:/app/.ssh" \
+  -v "${DATA_DIR}:/app/data" \
   "$IMAGE_NAME"
 
 # 5. Open firewall port via UFW (if available)
