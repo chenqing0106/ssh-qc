@@ -3,16 +3,31 @@ en:
   tab_projects: "Projects"
   tab_contact: "Contact"
 
-  name: "QingChen (卿晨)"
+  name: "QingChen (she/they）"
+  school: "Central South University"
   role: "Software Engineering Student"
-  city: "Changsha, China"
-  status: "open to work"
+  city: "Changsha, China/Guiyanga, China"
+  status: "open to work,chatting,having fun！"
 
   bio:
     - "A builder at heart — using code to expand the boundaries of the possible,"
     - "drawn to the intersection of technology and the humanities."
     - "Like a mushroom thriving in post-apocalyptic ruins —"
     - "quietly spreading a decentralized, anti-monopoly colony!"
+
+  about_tagline: "who I am · what I love · what I build"
+
+  currently_title: "Currently"
+  currently:
+    - "Building things at the intersection of code and creativity"
+    - "Exploring AI-native development & Web3"
+    - "Open to internships & collaborations"
+
+  interests_title: "Into"
+  interests:
+    - "Visual arts, music & cultural wandering"
+    - "Decentralization & open-source ecosystems"
+    - "Sci-fi, philosophy & anything that expands the mind"
 
   skills_title: "Skills & Expertise"
   skills:
@@ -34,13 +49,20 @@ en:
       links:
         - "https://chain-garden-zetachain.vercel.app"
         - "https://github.com/chenqing0106/chain-garden"
-    - name: "Virtual TCM Teaching Platform"
+    - name: "ssh.mornqing.com"
       desc: |-
-        3D interactive online learning system for traditional Chinese
-        medicine, built with React Three Fiber. Delivered 5 core
-        modules independently during a company internship.
+        An SSH-based TUI — yes, the one you're navigating right now.
+        Built with Go, Bubble Tea and Wish. Guestbook, visitor counter,
+        bilingual switching, CI/CD auto-deploy. One-command access,
+        no browser needed.
       links:
-        - "https://github.com/software-engineer-group-oasis/chinese-medicine"
+        - "https://github.com/chenqing0106/ssh-qc"
+
+  open_to_title: "Open to"
+  open_to:
+    - "Internships & full-time roles"
+    - "Hackathon teammates & side-project collabs"
+    - "Interesting conversations & new friendships"
 
   contact_title: "Get in Touch"
   contacts:
@@ -74,10 +96,11 @@ zh:
   tab_projects: "项目"
   tab_contact: "联系"
 
-  name: "卿晨 (QingChen)"
+  name: "卿晨 "
+  school: "中南大学"
   role: "软件工程在读学生"
-  city: "中国·长沙"
-  status: "求职中"
+  city: "中国·长沙/中国·贵阳"
+  status: "求职中,也欢迎找我聊天,一起玩耍"
 
   bio:
     - "想成为世界的 builder，用代码拓宽世界的边界，"
@@ -85,14 +108,28 @@ zh:
     - "如同一颗在末日废墟中生长的菌菇，"
     - "悄悄蔓延，构建去中心化、反垄断的菌落。"
 
+  about_tagline: "我是谁 · 我喜欢什么 · 我能做什么"
+
+  currently_title: "近况"
+  currently:
+    - "在代码与创意的交叉地带瞎搞"
+    - "探索 AI 原生开发与 Web3"
+    - "寻找实习机会与有趣的合作"
+
+  interests_title: "喜欢"
+  interests:
+    - "视觉艺术、音乐与文化漫游"
+    - "去中心化与开源生态"
+    - "科幻、哲学，以及一切能扩展认知的东西"
+
   skills_title: "技能 / 专长"
   skills:
-    - "React / Next.js 15 / TypeScript"
+    - "React / Next.js  / TypeScript"
     - "LLM 集成（Claude / Gemini / Qwen API）"
     - "Canvas API / Web Audio API / Tone.js"
     - "Node.js / RESTful API"
     - "Web3 概念与 Solidity 基础"
-    - "AI 原生开发（Claude Code, Cursor）"
+    - "AI native 开发（Claude Code, Cursor）"
     - "日常关注视觉艺术、人文与文化话题"
 
   projects_title: "精选项目"
@@ -105,12 +142,19 @@ zh:
       links:
         - "https://chain-garden-zetachain.vercel.app"
         - "https://github.com/chenqing0106/chain-garden"
-    - name: "虚拟中医教学平台"
+    - name: "ssh.mornqing.com"
       desc: |-
-        基于 React Three Fiber 构建的 3D 交互式在线学习系统，
-        聚焦中医教学场景。实习期间独立完成 5 个核心模块交付。
+        基于 SSH 的 TUI —— 就是你正在用的这个。Go + Bubble Tea +
+        Wish 构建。留言本、访客计数、中英切换、CI/CD 自动部署。
+        一行命令，无需浏览器。
       links:
-        - "https://github.com/software-engineer-group-oasis/chinese-medicine"
+        - "https://github.com/chenqing0106/ssh-qc"
+
+  open_to_title: "欢迎"
+  open_to:
+    - "实习 & 全职机会"
+    - "黑客松队友 & 项目合作"
+    - "有趣的对话 & 新朋友"
 
   contact_title: "联系方式"
   contacts:

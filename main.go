@@ -74,13 +74,25 @@ type content struct {
 	TabGuestbook string `yaml:"tab_guestbook"`
 
 	Name   string   `yaml:"name"`
+	School string   `yaml:"school"`
 	Role   string   `yaml:"role"`
 	City   string   `yaml:"city"`
 	Status string   `yaml:"status"`
 	Bio    []string `yaml:"bio"`
 
+	AboutTagline string `yaml:"about_tagline"`
+
+	CurrentlyTitle string   `yaml:"currently_title"`
+	Currently      []string `yaml:"currently"`
+
+	InterestsTitle string   `yaml:"interests_title"`
+	Interests      []string `yaml:"interests"`
+
 	SkillsTitle string   `yaml:"skills_title"`
 	Skills      []string `yaml:"skills"`
+
+	OpenToTitle string   `yaml:"open_to_title"`
+	OpenTo      []string `yaml:"open_to"`
 
 	ProjectsTitle string    `yaml:"projects_title"`
 	Projects      []project `yaml:"projects"`
@@ -504,9 +516,9 @@ func (m model) viewHome(c content, w int) string {
 	name := lipgloss.NewStyle().Foreground(colorPurple).
 		Render(strings.TrimRight(nameArt, "\n"))
 
-	csuLink := hyperlink("https://www.csu.edu.cn", "CSU")
-	sub := lipgloss.NewStyle().Foreground(colorCyan).Italic(true).
-		Render(csuLink + "  " + c.Role + "  ·  " + c.City)
+	// csuLink := hyperlink("https://www.csu.edu.cn", "CSU")
+	// sub := lipgloss.NewStyle().Foreground(colorCyan).Italic(true).
+	// 	Render(csuLink + "  " + c.Role + "  ·  " + c.City)
 
 	badge := lipgloss.NewStyle().Foreground(colorGreen).Bold(true).
 		Render("● " + c.Status)
@@ -531,7 +543,7 @@ func (m model) viewHome(c content, w int) string {
 	sparkles := renderSparkles(m.sparkleFrame, lipgloss.Width(name))
 
 	rightCol := lipgloss.JoinVertical(lipgloss.Left,
-		name, sparkles, sub, badge, "", bio, "", menu, "", preview,
+		name, sparkles, badge, "", bio, "", menu, "", preview,
 	)
 
 	combined := lipgloss.JoinHorizontal(lipgloss.Top,
@@ -584,10 +596,7 @@ func (m model) viewMenuPreview(c content) string {
 	dim := lipgloss.NewStyle().Foreground(colorDim)
 	switch m.selected {
 	case 0:
-		return lipgloss.JoinVertical(lipgloss.Left,
-			dim.Render("   "+c.Name),
-			dim.Render(fmt.Sprintf("   %d skills · %s", len(c.Skills), c.City)),
-		)
+		return dim.Render("   " + c.AboutTagline)
 	case 1:
 		var lines []string
 		for _, p := range c.Projects {
@@ -681,14 +690,21 @@ func (m model) viewAboutBody(c content) string {
 
 	info := strings.Join([]string{
 		label("Name") + val(c.Name),
+		label("School") + val(c.School),
 		label("Role") + val(c.Role),
 		label("City") + val(c.City),
 	}, "\n")
 
-	bioHeader := lipgloss.NewStyle().Foreground(colorCyan).Bold(true).Render("Bio")
-	var bioLines []string
-	for _, l := range c.Bio {
-		bioLines = append(bioLines, "  "+lipgloss.NewStyle().Foreground(colorWhite).Render(l))
+	currentlyHeader := lipgloss.NewStyle().Foreground(colorCyan).Bold(true).Render(c.CurrentlyTitle)
+	var currentlyLines []string
+	for _, s := range c.Currently {
+		currentlyLines = append(currentlyLines, "  "+lipgloss.NewStyle().Foreground(colorWhite).Render("→ "+s))
+	}
+
+	interestsHeader := lipgloss.NewStyle().Foreground(colorCyan).Bold(true).Render(c.InterestsTitle)
+	var interestsLines []string
+	for _, s := range c.Interests {
+		interestsLines = append(interestsLines, "  "+lipgloss.NewStyle().Foreground(colorPink).Render("♡ "+s))
 	}
 
 	skillHeader := lipgloss.NewStyle().Foreground(colorCyan).Bold(true).Render(c.SkillsTitle)
@@ -699,8 +715,10 @@ func (m model) viewAboutBody(c content) string {
 
 	return lipgloss.JoinVertical(lipgloss.Left,
 		info, "",
-		bioHeader,
-		strings.Join(bioLines, "\n"), "",
+		currentlyHeader,
+		strings.Join(currentlyLines, "\n"), "",
+		interestsHeader,
+		strings.Join(interestsLines, "\n"), "",
 		skillHeader,
 		strings.Join(skillLines, "\n"),
 	)
@@ -746,6 +764,16 @@ func contactURL(val string) string {
 
 func (m model) viewContactBody(c content) string {
 	var lines []string
+
+	openToHeader := lipgloss.NewStyle().Foreground(colorCyan).Bold(true).Render(c.OpenToTitle)
+	lines = append(lines, openToHeader)
+	for _, s := range c.OpenTo {
+		lines = append(lines, "  "+lipgloss.NewStyle().Foreground(colorPink).Render("✦ "+s))
+	}
+	lines = append(lines, "")
+
+	contactHeader := lipgloss.NewStyle().Foreground(colorCyan).Bold(true).Render(c.ContactTitle)
+	lines = append(lines, contactHeader)
 	for _, ct := range c.Contacts {
 		label := lipgloss.NewStyle().Foreground(colorYellow).Width(12).Render(ct.Label)
 		display := ct.Value
@@ -755,11 +783,6 @@ func (m model) viewContactBody(c content) string {
 		value := lipgloss.NewStyle().Foreground(colorCyan).Render(display)
 		lines = append(lines, "  "+label+value)
 	}
-	lines = append(lines, "")
-	lines = append(lines,
-		lipgloss.NewStyle().Foreground(colorPink).Italic(true).
-			Render("  ✦ Open to collaborations, internships & interesting conversations."),
-	)
 	return strings.Join(lines, "\n")
 }
 
