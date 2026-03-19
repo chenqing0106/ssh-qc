@@ -4,6 +4,9 @@ ssh-portfolio
 # SSH host keys
 .ssh/
 
+# SQLite database (persisted via Docker volume, not in git)
+data/
+
 # macOS
 .DS_Store
 .obsidian/
