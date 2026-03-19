@@ -7,7 +7,7 @@ en:
   school: "Central South University"
   role: "Software Engineering Student"
   city: "Changsha, China/Guiyanga, China"
-  status: "open to work,chatting,having fun！"
+  status: "open to work, chat, and fun！"
 
   bio:
     - "A builder at heart — using code to expand the boundaries of the possible,"
@@ -27,7 +27,7 @@ en:
   interests:
     - "Visual arts, music & cultural wandering"
     - "Decentralization & open-source ecosystems"
-    - "Sci-fi, philosophy & anything that expands the mind"
+    - "curious about philosophy of technology & anything that expands the mind"
 
   skills_title: "Skills & Expertise"
   skills:
@@ -105,22 +105,22 @@ zh:
   bio:
     - "想成为世界的 builder，用代码拓宽世界的边界，"
     - "致力于探索技术与人文的交叉地带。"
-    - "如同一颗在末日废墟中生长的菌菇，"
-    - "悄悄蔓延，构建去中心化、反垄断的菌落。"
+    - "想成为在末日废墟中生长的菌菇，"
+    - "不断蔓延，构建去中心化、反垄断的菌落。"
 
   about_tagline: "我是谁 · 我喜欢什么 · 我能做什么"
 
   currently_title: "近况"
   currently:
     - "在代码与创意的交叉地带玩玩"
-    - "探索 AI 原生开发与 Web3"
+    - "探索 AI native 开发与 Web3"
     - "寻找实习机会与有趣的合作"
 
   interests_title: "喜欢"
   interests:
     - "视觉艺术、音乐与文化漫游"
     - "去中心化与开源生态"
-    - "好奇技术哲学，以及一切能扩展认知的东西"
+    - "好奇技术哲学，以及一切能扩展想法的东西"
 
   skills_title: "技能 / 专长"
   skills:

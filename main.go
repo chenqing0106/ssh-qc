@@ -167,6 +167,7 @@ func initDB(path string) error {
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
 			name TEXT NOT NULL,
 			message TEXT NOT NULL,
+			ip TEXT NOT NULL DEFAULT '',
 			created_at INTEGER NOT NULL
 		);
 	`)
@@ -199,8 +200,8 @@ func fetchGuestbook() []guestbookEntry {
 	return entries
 }
 
-func addGuestbookEntry(name, message string) {
-	db.Exec(`INSERT INTO guestbook (name, message, created_at) VALUES (?, ?, ?)`, name, message, time.Now().Unix())
+func addGuestbookEntry(name, message, ip string) {
+	db.Exec(`INSERT INTO guestbook (name, message, ip, created_at) VALUES (?, ?, ?, ?)`, name, message, ip, time.Now().Unix())
 }
 
 func extractIP(addr string) string {
@@ -224,6 +225,7 @@ type model struct {
 	sparkleFrame int
 
 	visitorNum   int
+	ip           string
 	guestEntries []guestbookEntry
 	guestScroll  int
 
@@ -232,7 +234,7 @@ type model struct {
 	activeInput int // 0=name 1=message
 }
 
-func initialModel(visitorNum int, entries []guestbookEntry) model {
+func initialModel(visitorNum int, ip string, entries []guestbookEntry) model {
 	ni := textinput.New()
 	ni.Placeholder = "your name"
 	ni.CharLimit = 30
@@ -253,6 +255,7 @@ func initialModel(visitorNum int, entries []guestbookEntry) model {
 		lang:         "en",
 		now:          time.Now(),
 		visitorNum:   visitorNum,
+		ip:           ip,
 		guestEntries: entries,
 		nameInput:    ni,
 		msgInput:     mi,
@@ -426,7 +429,7 @@ func (m model) updateWrite(msg tea.KeyMsg) (model, tea.Cmd) {
 		name := strings.TrimSpace(m.nameInput.Value())
 		message := strings.TrimSpace(m.msgInput.Value())
 		if name != "" && message != "" {
-			addGuestbookEntry(name, message)
+			addGuestbookEntry(name, message, m.ip)
 			m.guestEntries = fetchGuestbook()
 			m.guestScroll = 0
 		}
@@ -512,7 +515,7 @@ func sep(w int) string {
 // ── home ──────────────────────────────────────────────────────────────────────
 
 func (m model) viewHome(c content, w int) string {
-	avatar := strings.TrimRight(avatarArt, "\n")
+	avatar := strings.TrimRight(avatarArt, "\n") + "\033[0m"
 	name := lipgloss.NewStyle().Foreground(colorPurple).
 		Render(strings.TrimRight(nameArt, "\n"))
 
@@ -922,5 +925,5 @@ func teaHandler(s ssh.Session) (tea.Model, []tea.ProgramOption) {
 	visitorNum := registerVisitor(ip)
 	entries := fetchGuestbook()
 
-	return initialModel(visitorNum, entries), []tea.ProgramOption{tea.WithAltScreen()}
+	return initialModel(visitorNum, ip, entries), []tea.ProgramOption{tea.WithAltScreen()}
 }
