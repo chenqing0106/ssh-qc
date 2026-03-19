@@ -52,13 +52,39 @@ docker run -d \
 
 # 5. Open firewall port via UFW (if available)
 if command -v ufw &>/dev/null; then
-  echo "==> Configuring UFW for port $PORT..."
+  echo "==> Configuring UFW for port $PORT and 80..."
   sudo ufw allow "${PORT}/tcp"
+  sudo ufw allow 80/tcp
   sudo ufw reload
 fi
+
+# 6. Deploy web landing page via Nginx
+echo "==> Deploying web landing page..."
+if ! command -v nginx &>/dev/null; then
+  echo "==> Nginx not found, installing..."
+  sudo apt-get update -qq && sudo apt-get install -y nginx
+fi
+
+sudo cp "$APP_DIR/web/index.html" /var/www/html/index.html
+
+sudo tee /etc/nginx/sites-available/ssh-portfolio > /dev/null <<'NGINX'
+server {
+    listen 80 default_server;
+    root /var/www/html;
+    index index.html;
+    location / {
+        try_files $uri $uri/ =404;
+    }
+}
+NGINX
+
+sudo ln -sf /etc/nginx/sites-available/ssh-portfolio /etc/nginx/sites-enabled/ssh-portfolio
+sudo rm -f /etc/nginx/sites-enabled/default
+sudo nginx -t && sudo systemctl reload nginx
 
 echo ""
 echo "==> Done! Container status:"
 docker ps --filter "name=$CONTAINER_NAME" --format "  {{.Names}}  {{.Status}}  {{.Ports}}"
 echo ""
-echo "==> Test: ssh -p $PORT <server-ip>"
+echo "==> SSH:  ssh -p $PORT <server-ip>"
+echo "==> Web:  http://<server-ip>"
