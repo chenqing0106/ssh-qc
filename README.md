@@ -17,7 +17,9 @@ ssh -p 106 ssh.mornqing.com
 - 右下角实时时钟
 - 名字下方闪烁动画
 - 首页菜单悬停预览
-- 三个详情页：**关于**、**项目**、**联系方式**
+- 四个详情页：**关于**、**项目**、**联系方式**、**留言板**
+- 留言板：任何人可留言，持久化存储，所有访客可见
+- 访客计数器：显示你是第几位访客
 - 中英双语实时切换（`l`）
 - 可点击超链接（支持 iTerm2、Kitty、GNOME Terminal 等）
 
@@ -29,6 +31,7 @@ ssh -p 106 ssh.mornqing.com
 | `enter` | 进入页面 |
 | `esc` / `backspace` | 返回首页 |
 | `l` | 切换语言（中 ↔ 英） |
+| `w` | 在留言板页写留言 |
 | `q` / `ctrl+c` | 退出 |
 
 ## 技术栈
@@ -38,16 +41,14 @@ ssh -p 106 ssh.mornqing.com
 | SSH 服务器 | [Wish](https://github.com/charmbracelet/wish) |
 | TUI 框架 | [Bubble Tea](https://github.com/charmbracelet/bubbletea) |
 | 终端样式 | [Lip Gloss](https://github.com/charmbracelet/lipgloss) |
-| 语言 | Go 1.22+ |
+| 数据库 | [modernc.org/sqlite](https://gitlab.com/cznic/sqlite)（纯 Go，无 CGO） |
+| 语言 | Go 1.25+ |
 
 ## 本地开发
 
 ```bash
 # 热重载（需要安装 air）
 air
-
-# 或手动构建运行
-go build -o ssh-portfolio . && ./ssh-portfolio
 
 # 连接测试
 ssh -p 106 localhost
@@ -57,7 +58,7 @@ ssh -p 106 localhost
 
 ## 自定义内容
 
-所有文案在 `main.go` 中的 `en` 和 `zh` 变量里，修改名字、Bio、项目、联系方式后重新构建即可。
+所有文案在 `content.yaml` 中，修改后无需重新编译，重启服务即生效。
 
 ASCII 资源文件：
 - `ascii/avatar.txt` — 彩色 ASCII 头像（用 `ascii-image-converter` 生成）
@@ -83,6 +84,7 @@ bash deploy.sh
 ```
 ssh-portfolio/
 ├── main.go          # 全部逻辑：SSH 服务器 + TUI + 内容
+├── content.yaml     # 所有文案（中英双语）
 ├── ascii/
 │   ├── avatar.txt   # ASCII 头像
 │   └── name.txt     # 大字名称

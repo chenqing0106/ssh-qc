@@ -217,7 +217,6 @@ docker restart ssh-portfolio       # 重启
 ```
 ssh-portfolio/
 ├── CLAUDE.md              # 本文件（决策日志）
-├── content.md             # 个人内容参考（已写入 main.go）
 ├── main.go                # 全部逻辑：SSH server + TUI model + 内容
 ├── ascii/
 │   ├── avatar.txt         # ASCII 头像（占位符，替换为自己的）
