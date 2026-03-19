@@ -74,7 +74,6 @@ type content struct {
 	TabGuestbook string `yaml:"tab_guestbook"`
 
 	Name   string   `yaml:"name"`
-	School string   `yaml:"school"`
 	Role   string   `yaml:"role"`
 	City   string   `yaml:"city"`
 	Status string   `yaml:"status"`
@@ -693,7 +692,6 @@ func (m model) viewAboutBody(c content) string {
 
 	info := strings.Join([]string{
 		label("Name") + val(c.Name),
-		label("School") + val(c.School),
 		label("Role") + val(c.Role),
 		label("City") + val(c.City),
 	}, "\n")

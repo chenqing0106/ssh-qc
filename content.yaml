@@ -3,8 +3,7 @@ en:
   tab_projects: "Projects"
   tab_contact: "Contact"
 
-  name: "QingChen (she/they）"
-  school: "Central South University"
+  name: "QingChen"
   role: "Software Engineering Student"
   city: "Changsha, China/Guiyanga, China"
   status: "open to work, chat, and fun！"
@@ -96,8 +95,7 @@ zh:
   tab_projects: "项目"
   tab_contact: "联系"
 
-  name: "卿晨 "
-  school: "中南大学"
+  name: "清晨"
   role: "软件工程在读学生"
   city: "中国·长沙/中国·贵阳"
   status: "求职中,也欢迎找我聊天,一起玩耍"
