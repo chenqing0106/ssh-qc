@@ -75,9 +75,15 @@ ASCII 资源文件：
 bash deploy.sh
 ```
 
-脚本自动处理 Docker 安装、镜像构建、容器替换、UFW 配置。端口从 `Dockerfile` 的 `EXPOSE` 读取。
+脚本自动处理 Docker 安装、镜像构建、容器替换、UFW 配置，以及 Nginx HTTPS 和 Let's Encrypt 证书自动续期。端口从 `Dockerfile` 的 `EXPOSE` 读取，Web 域名默认为 `ssh.mornqing.com`。
 
-> 云服务商的安全组需要手动在控制台放行对应端口（入站 TCP）。
+首次申请证书前，需要确保域名的 DNS 记录已经指向 VPS，并在云服务商安全组中放行 80 和 443 端口。需要覆盖域名或接收 Let's Encrypt 通知时，可以这样部署：
+
+```bash
+DOMAIN=ssh.mornqing.com LETSENCRYPT_EMAIL=you@example.com bash deploy.sh
+```
+
+> SSH 服务仍使用原来的 106 端口，不受 HTTPS 配置影响。
 
 ## 项目结构
 
