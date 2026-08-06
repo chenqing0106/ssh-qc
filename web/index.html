@@ -24,6 +24,25 @@
       width: 100%;
     }
 
+    .language-toggle {
+      position: fixed;
+      top: 1.5rem;
+      right: 1.5rem;
+      background: none;
+      border: 1px solid #2a2a2a;
+      border-radius: 4px;
+      color: #6b7280;
+      font-family: inherit;
+      font-size: 0.75rem;
+      padding: 0.3rem 0.6rem;
+      cursor: pointer;
+    }
+
+    .language-toggle:hover {
+      color: #c084fc;
+      border-color: #c084fc;
+    }
+
     .name {
       color: #c084fc;
       font-size: 1.5rem;
@@ -167,43 +186,44 @@
   </style>
 </head>
 <body>
+  <button class="language-toggle" type="button" onclick="toggleLanguage()" aria-label="切换语言">中文</button>
   <div class="container">
 
     <div class="name">QingChen</div>
-    <div class="tagline">Software Engineering Student · builder · open to work</div>
+    <div class="tagline" data-i18n="tagline">Software Engineering Student · builder · open to work</div>
 
-    <div class="label">// connect via SSH</div>
+    <div class="label" data-i18n="connect">// connect via SSH</div>
     <div class="command-box">
       <span class="command-text">ssh -p 106 ssh.mornqing.com</span>
-      <button class="copy-btn" onclick="copyCommand(this)">copy</button>
+      <button class="copy-btn" type="button" onclick="copyCommand(this)" data-i18n="copy">copy</button>
     </div>
-    <div class="hint">No installation needed — works in any terminal.</div>
+    <div class="hint" data-i18n="hint">No installation needed — works in any terminal.</div>
 
-    <div class="section-title">// navigation</div>
+    <div class="section-title" data-i18n="navigation">// navigation</div>
     <table>
       <tr>
         <td>↑ ↓ / j k</td>
-        <td>select menu item</td>
+        <td data-i18n="select">select menu item</td>
       </tr>
       <tr>
         <td>enter</td>
-        <td>open page</td>
+        <td data-i18n="open">open page</td>
       </tr>
       <tr>
         <td>esc / backspace</td>
-        <td>go back</td>
+        <td data-i18n="back">go back</td>
       </tr>
       <tr>
         <td>l</td>
-        <td>switch language (EN ↔ 中文)</td>
+        <td data-i18n="switchLanguage">switch language (EN ↔ 中文)</td>
       </tr>
       <tr>
         <td>w</td>
-        <td>write in guestbook</td>
+        <td data-i18n="guestbook">write in guestbook</td>
       </tr>
       <tr>
         <td>q / ctrl+c</td>
-        <td>quit</td>
+        <td data-i18n="quit">quit</td>
       </tr>
     </table>
 
@@ -219,24 +239,120 @@
     </div>
 
     <div class="footer">
-      built with <a href="https://github.com/charmbracelet/wish" target="_blank">Wish</a> +
+      <span data-i18n="builtWith">built with</span> <a href="https://github.com/charmbracelet/wish" target="_blank">Wish</a> +
       <a href="https://github.com/charmbracelet/bubbletea" target="_blank">Bubble Tea</a> ·
-      <a href="https://github.com/chenqing0106/ssh-qc" target="_blank">source</a>
+      <a href="https://github.com/chenqing0106/ssh-qc" target="_blank" data-i18n="source">source</a>
     </div>
 
   </div>
 
   <script>
-    function copyCommand(btn) {
-      navigator.clipboard.writeText('ssh -p 106 ssh.mornqing.com').then(() => {
-        btn.textContent = 'copied!';
+    const translations = {
+      en: {
+        tagline: 'Software Engineering Student · builder · open to work',
+        connect: '// connect via SSH',
+        copy: 'copy',
+        copied: 'copied!',
+        copyFailed: 'copy failed',
+        hint: 'No installation needed — works in any terminal.',
+        navigation: '// navigation',
+        select: 'select menu item',
+        open: 'open page',
+        back: 'go back',
+        switchLanguage: 'switch language (EN ↔ 中文)',
+        guestbook: 'write in guestbook',
+        quit: 'quit',
+        builtWith: 'built with',
+        source: 'source',
+        toggle: '中文'
+      },
+      zh: {
+        tagline: '软件工程学生 · 独立构建者 · 开放求职',
+        connect: '// 通过 SSH 连接',
+        copy: '复制',
+        copied: '已复制！',
+        copyFailed: '复制失败',
+        hint: '无需安装任何东西——在任意终端中运行。',
+        navigation: '// 操作说明',
+        select: '选择菜单项',
+        open: '打开页面',
+        back: '返回上一级',
+        switchLanguage: '切换语言（EN ↔ 中文）',
+        guestbook: '在留言板留言',
+        quit: '退出',
+        builtWith: '使用',
+        source: '源代码',
+        toggle: 'EN'
+      }
+    };
+    let language = localStorage.getItem('site-language') || 'en';
+
+    function applyLanguage() {
+      const strings = translations[language];
+      document.documentElement.lang = language === 'zh' ? 'zh-CN' : 'en';
+      document.querySelectorAll('[data-i18n]').forEach((element) => {
+        element.textContent = strings[element.dataset.i18n];
+      });
+      document.querySelector('.language-toggle').textContent = strings.toggle;
+    }
+
+    function toggleLanguage() {
+      language = language === 'en' ? 'zh' : 'en';
+      localStorage.setItem('site-language', language);
+      applyLanguage();
+    }
+
+    function fallbackCopy(text) {
+      const textarea = document.createElement('textarea');
+      textarea.value = text;
+      textarea.setAttribute('readonly', '');
+      textarea.style.position = 'fixed';
+      textarea.style.opacity = '0';
+      document.body.appendChild(textarea);
+      textarea.select();
+
+      let copied = false;
+      try {
+        copied = document.execCommand('copy');
+      } finally {
+        document.body.removeChild(textarea);
+      }
+      return copied;
+    }
+
+    async function copyCommand(btn) {
+      const command = btn.closest('.command-box').querySelector('.command-text').textContent.trim();
+      let copied = false;
+
+      if (navigator.clipboard && window.isSecureContext) {
+        try {
+          await navigator.clipboard.writeText(command);
+          copied = true;
+        } catch (_) {
+          // Fall back below when clipboard permissions are unavailable.
+        }
+      }
+
+      if (!copied) {
+        copied = fallbackCopy(command);
+      }
+
+      if (copied) {
+        btn.textContent = translations[language].copied;
         btn.classList.add('copied');
         setTimeout(() => {
-          btn.textContent = 'copy';
+          btn.textContent = translations[language].copy;
           btn.classList.remove('copied');
         }, 2000);
-      });
+      } else {
+        btn.textContent = translations[language].copyFailed;
+        setTimeout(() => {
+          btn.textContent = translations[language].copy;
+        }, 2000);
+      }
     }
+
+    applyLanguage();
   </script>
 </body>
 </html>
